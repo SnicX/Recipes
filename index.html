@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SnicX - Простые рецепты</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&family=Merriweather:wght@400;700&display=swap');
+
+        :root {
+            --coffee-dark: #6F4E37;
+            --coffee-medium: #A67B5B;
+            --beige-light: #D2B48C;
+            --cream: #F5F5DC;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --transition-speed: 0.3s;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background-color: var(--cream);
+            color: var(--coffee-dark);
+            line-height: 1.6;
+            scroll-behavior: smooth;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            background-color: var(--beige-light);
+            box-shadow: 0 4px 6px var(--shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: 1rem 0;
+        }
+
+        header nav {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        header nav a {
+            color: var(--coffee-dark);
+            text-decoration: none;
+            font-size: 1.2rem;
+            font-weight: 700;
+            padding: 15px 25px;
+            transition: color var(--transition-speed), background-color var(--transition-speed), transform var(--transition-speed);
+        }
+
+        header nav a:hover {
+            color: var(--cream);
+            background-color: var(--coffee-medium);
+            transform: translateY(-3px);
+            border-radius: 5px;
+        }
+
+        .dropdown {
+            position: relative;
+            display: inline-block;
+        }
+
+        .dropdown-content {
+            display: none;
+            position: absolute;
+            background-color: var(--beige-light);
+            min-width: 160px;
+            box-shadow: 0px 8px 16px var(--shadow);
+            z-index: 1;
+        }
+
+        .dropdown:hover .dropdown-content {
+            display: block;
+        }
+
+        .dropdown-content a {
+            color: var(--coffee-dark);
+            padding: 12px 16px;
+            text-decoration: none;
+            display: block;
+            text-align: left;
+        }
+
+        .dropdown-content a:hover {
+            background-color: var(--coffee-medium);
+            color: var(--cream);
+        }
+
+        section {
+            padding: 80px 0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1s ease-out, transform 1s ease-out;
+        }
+
+        section.animate {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        h1, h2 {
+            font-family: 'Merriweather', serif;
+            font-weight: 700;
+            color: var(--coffee-dark);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .hero {
+            background: linear-gradient(rgba(245, 245, 220, 0.5), rgba(245, 245, 220, 0.5)), url('https://images.unsplash.com/photo-1549488344-93339e334e02?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=1920&h=1080&fit=crop');
+            background-size: cover;
+            background-position: center;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: var(--coffee-dark);
+        }
+
+        .hero-content {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 40px;
+            border-radius: 10px;
+        }
+        
+        .recipe-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+        }
+
+        .recipe-card {
+            background-color: var(--beige-light);
+            border-radius: 10px;
+            box-shadow: 0 4px 8px var(--shadow);
+            overflow: hidden;
+            transition: transform var(--transition-speed);
+            cursor: pointer;
+        }
+
+        .recipe-card:hover {
+            transform: translateY(-10px);
+        }
+
+        .recipe-card img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-bottom: 3px solid var(--coffee-medium);
+        }
+
+        .recipe-card-content {
+            padding: 20px;
+        }
+
+        .recipe-card-content h3 {
+            font-family: 'Merriweather', serif;
+            margin-bottom: 10px;
+            color: var(--coffee-dark);
+        }
+
+        footer {
+            background-color: var(--coffee-dark);
+            color: var(--cream);
+            text-align: center;
+            padding: 20px;
+            margin-top: 50px;
+        }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 200;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            overflow: auto;
+            animation: fadeIn 0.5s;
+        }
+
+        .modal-content {
+            background-color: var(--cream);
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 700px;
+            position: relative;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            animation: slideIn 0.5s forwards;
+        }
+
+        .close-btn {
+            color: var(--coffee-dark);
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            font-size: 30px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+
+        .close-btn:hover, .close-btn:focus {
+            color: var(--coffee-medium);
+            text-decoration: none;
+            cursor: pointer;
+        }
+        
+        .modal-content h3 {
+            font-family: 'Merriweather', serif;
+            color: var(--coffee-dark);
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-content ul {
+            list-style-type: none;
+            padding: 0;
+            margin-bottom: 20px;
+        }
+
+        .modal-content li {
+            padding: 5px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+    </style>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <a href="#home">Главная</a>
+            <div class="dropdown">
+                <a href="#recipes">Рецепты ▼</a>
+                <div class="dropdown-content">
+                    <a href="#fast-recipes">Быстрые</a>
+                    <a href="#long-recipes">Долгие</a>
+                </div>
+            </div>
+            <a href="#about">О сайте</a>
+        </nav>
+    </header>
+
+    <main class="container">
+        
+        <section id="home" class="hero animate">
+            <div class="hero-content">
+                <h1>Добро пожаловать в мир рецептов!</h1>
+                <p>Здесь вы найдёте вкусные и лёгкие рецепты на каждый день.</p>
+                <img src="https://images.unsplash.com/photo-1546069901-ba9550302b1f?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=600&h=400&fit=crop" alt="Красивое блюдо">
+            </div>
+        </section>
+
+        <section id="recipes">
+            <h2 id="fast-recipes">Быстрые рецепты (до 30 минут)</h2>
+            <div class="recipe-grid">
+                <div class="recipe-card" data-recipe-id="pizza">
+                    <img src="https://images.unsplash.com/photo-1565299624946-b28f40a370e7?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Пицца">
+                    <div class="recipe-card-content">
+                        <h3>Быстрая пицца</h3>
+                        <p>Идеальна, когда хочется чего-то вкусного и быстро. Готовится за 20 минут.</p>
+                    </div>
+                </div>
+                <div class="recipe-card" data-recipe-id="pasta">
+                    <img src="https://images.unsplash.com/photo-1579737158300-47b2b80a2b5e?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Паста с томатным соусом">
+                    <div class="recipe-card-content">
+                        <h3>Паста с томатным соусом</h3>
+                        <p>Классика, которая никогда не надоест. Приготовление: 25 минут.</p>
+                    </div>
+                </div>
+                <div class="recipe-card" data-recipe-id="salad">
+                    <img src="https://images.unsplash.com/photo-1588698188168-54c34a211832?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Салат с авокадо">
+                    <div class="recipe-card-content">
+                        <h3>Салат с авокадо</h3>
+                        <p>Лёгкий и полезный салат. Время: 15 минут.</p>
+                    </div>
+                </div>
+                <div class="recipe-card" data-recipe-id="chicken">
+                    <img src="https://images.unsplash.com/photo-1551608821-1773950b73c2?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Курица с овощами">
+                    <div class="recipe-card-content">
+                        <h3>Курица с овощами</h3>
+                        <p>Просто и вкусно. Готовится за 30 минут.</p>
+                    </div>
+                </div>
+                <div class="recipe-card" data-recipe-id="quesadilla">
+                    <img src="https://images.unsplash.com/photo-1522003189955-4424316a7e02?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Кесадилья">
+                    <div class="recipe-card-content">
+                        <h3>Кесадилья с сыром</h3>
+                        <p>Отличный вариант для быстрого перекуса. Всего 10 минут.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <h2 id="long-recipes">Долгие рецепты (до 2 часов)</h2>
+            <div class="recipe-grid">
+                <div class="recipe-card" data-recipe-id="lasagna">
+                    <img src="https://images.unsplash.com/photo-1546069901-ba9550302b1f?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Лазанья">
+                    <div class="recipe-card-content">
+                        <h3>Классическая лазанья</h3>
+                        <p>Вкуснейшее блюдо для всей семьи. Время: 1.5 часа.</p>
+                    </div>
+                </div>
+                <div class="recipe-card" data-recipe-id="fish-soup">
+                    <img src="https://images.unsplash.com/photo-1506812836261-12c8233f524c?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Рыбный суп">
+                    <div class="recipe-card-content">
+                        <h3>Наваристый рыбный суп</h3>
+                        <p>Идеально для уютного вечера. Время: 1 час.</p>
+                    </div>
+                </div>
+                <div class="recipe-card" data-recipe-id="pork-roast">
+                    <img src="https://images.unsplash.com/photo-1546069901-ba9550302b1f?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Жаркое из свинины">
+                    <div class="recipe-card-content">
+                        <h3>Жаркое из свинины</h3>
+                        <p>Сытное и ароматное блюдо. Готовка: 2 часа.</p>
+                    </div>
+                </div>
+                <div class="recipe-card" data-recipe-id="french-meat">
+                    <img src="https://images.unsplash.com/photo-1559869680-e4b52c03884d?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Мясо по-французски">
+                    <div class="recipe-card-content">
+                        <h3>Мясо по-французски</h3>
+                        <p>Праздничное блюдо, которое не оставит никого равнодушным. Время: 1.5 часа.</p>
+                    </div>
+                </div>
+                <div class="recipe-card" data-recipe-id="apple-pie">
+                    <img src="https://images.unsplash.com/photo-1552554705-1a8c3e8a4d7d?ixlib=rb-4.0.3&q=85&fm=jpg&crop=entropy&cs=srgb&w=300&h=200&fit=crop" alt="Торт">
+                    <div class="recipe-card-content">
+                        <h3>Яблочный пирог</h3>
+                        <p>Классический десерт, который всегда к месту. Время: 1.5 часа.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="about">
+            <h2>О сайте</h2>
+            <p style="text-align: center;">Сайт был создан с одной целью — показать, что приготовление вкусной еды может быть простым и увлекательным. Мы собрали рецепты, которые легко повторить даже новичку, и надеемся, что они вдохновят вас на кулинарные эксперименты. Наша миссия — сделать процесс готовки приятным, а результат — восхитительным!</p>
+        </section>
+
+    </main>
+
+    <footer>
+        <p>© 2025 SnicX. All rights reserved.</p>
+    </footer>
+
+    <div id="recipeModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn">&times;</span>
+            <h3 id="modalTitle"></h3>
+            <h4>Ингредиенты:</h4>
+            <ul id="modalIngredients"></ul>
+            <h4>Приготовление:</h4>
+            <ol id="modalSteps"></ol>
+        </div>
+    </div>
+    
+    <script>
+        const recipes = {
+            "pizza": {
+                "title": "Быстрая пицца на сковороде",
+                "ingredients": [
+                    "Мука: 8 ст. ложек",
+                    "Сметана: 4 ст. ложки",
+                    "Майонез: 4 ст. ложки",
+                    "Яйцо: 1 шт.",
+                    "Колбаса, сыр, помидоры: по вкусу"
+                ],
+                "steps": [
+                    "Смешать все ингредиенты для теста до однородности.",
+                    "Вылить тесто на холодную сковороду, смазанную маслом.",
+                    "Выложить начинку и посыпать сыром.",
+                    "Накрыть крышкой и готовить на медленном огне 15-20 минут, пока сыр не расплавится."
+                ]
+            },
+            "pasta": {
+                "title": "Паста с томатным соусом",
+                "ingredients": [
+                    "Паста: 200 г",
+                    "Помидоры: 3-4 шт.",
+                    "Чеснок: 2 зубчика",
+                    "Оливковое масло: 2 ст. ложки",
+                    "Базилик, соль, перец: по вкусу"
+                ],
+                "steps": [
+                    "Отварить пасту до состояния аль денте.",
+                    "Нарезать помидоры и чеснок. Обжарить на масле.",
+                    "Добавить базилик, соль, перец. Тушить 10 минут.",
+                    "Смешать готовый соус с пастой."
+                ]
+            },
+            "salad": {
+                "title": "Салат с авокадо и помидорами",
+                "ingredients": [
+                    "Авокадо: 1 шт.",
+                    "Помидоры черри: 100 г",
+                    "Красный лук: 1/4 шт.",
+                    "Оливковое масло: 2 ст. ложки",
+                    "Лимонный сок: 1 ст. ложка",
+                    "Соль, перец: по вкусу"
+                ],
+                "steps": [
+                    "Нарезать авокадо, помидоры и лук.",
+                    "Смешать в миске.",
+                    "Заправить оливковым маслом, лимонным соком, солью и перцем.",
+                    "Аккуратно перемешать и подавать."
+                ]
+            },
+            "chicken": {
+                "title": "Курица с овощами в духовке",
+                "ingredients": [
+                    "Куриное филе: 500 г",
+                    "Брокколи: 200 г",
+                    "Морковь: 1 шт.",
+                    "Соевый соус: 3 ст. ложки",
+                    "Мед: 1 ч. ложка"
+                ],
+                "steps": [
+                    "Нарезать курицу и овощи.",
+                    "Смешать соевый соус и мед. Замариновать в нем курицу.",
+                    "Выложить курицу и овощи на противень.",
+                    "Запекать в разогретой духовке при 200°C 20-25 минут."
+                ]
+            },
+            "quesadilla": {
+                "title": "Кесадилья с сыром и ветчиной",
+                "ingredients": [
+                    "Тортилья: 2 шт.",
+                    "Сыр: 150 г",
+                    "Ветчина: 50 г",
+                    "Сливочное масло: 10 г"
+                ],
+                "steps": [
+                    "Натереть сыр, нарезать ветчину.",
+                    "Посыпать половину тортильи сыром и ветчиной.",
+                    "Накрыть второй половиной и обжарить на сковороде с маслом до золотистого цвета с обеих сторон."
+                ]
+            },
+            "lasagna": {
+                "title": "Классическая лазанья",
+                "ingredients": [
+                    "Листы для лазаньи: 9 шт.",
+                    "Говяжий фарш: 500 г",
+                    "Томатная паста: 3 ст. ложки",
+                    "Молоко: 500 мл",
+                    "Мука: 2 ст. ложки",
+                    "Сыр моцарелла: 200 г"
+                ],
+                "steps": [
+                    "Обжарить фарш с томатной пастой.",
+                    "Приготовить соус бешамель из молока и муки.",
+                    "Выложить слоями: соус, листы, фарш, сыр. Повторить 3 раза.",
+                    "Запекать в духовке 40 минут при 180°C."
+                ]
+            },
+            "fish-soup": {
+                "title": "Наваристый рыбный суп",
+                "ingredients": [
+                    "Рыбное филе: 400 г",
+                    "Картофель: 2-3 шт.",
+                    "Морковь: 1 шт.",
+                    "Лук: 1 шт.",
+                    "Сливки: 100 мл",
+                    "Зелень, соль, перец"
+                ],
+                "steps": [
+                    "Нарезать овощи и рыбу.",
+                    "Отварить овощи в кастрюле.",
+                    "Добавить рыбу, варить 10-15 минут.",
+                    "В конце добавить сливки, зелень, соль и перец. Дать настояться."
+                ]
+            },
+            "pork-roast": {
+                "title": "Жаркое из свинины",
+                "ingredients": [
+                    "Свинина: 800 г",
+                    "Картофель: 500 г",
+                    "Лук: 2 шт.",
+                    "Морковь: 2 шт.",
+                    "Чеснок: 3 зубчика",
+                    "Сметана: 200 г"
+                ],
+                "steps": [
+                    "Нарезать мясо и овощи крупными кусками.",
+                    "Обжарить мясо до золотистой корочки.",
+                    "Смешать все ингредиенты, залить сметаной.",
+                    "Тушить в духовке при 180°C около 1.5 часов."
+                ]
+            },
+            "french-meat": {
+                "title": "Мясо по-французски",
+                "ingredients": [
+                    "Свинина: 500 г",
+                    "Лук: 2 шт.",
+                    "Сыр: 200 г",
+                    "Майонез: 100 г",
+                    "Помидоры: 2 шт.",
+                    "Соль, перец"
+                ],
+                "steps": [
+                    "Отбить мясо, посолить и поперчить.",
+                    "Выложить на противень, сверху - кольца лука и помидоры.",
+                    "Смазать майонезом, посыпать сыром.",
+                    "Запекать в духовке при 180°C 40-50 минут."
+                ]
+            },
+            "apple-pie": {
+                "title": "Яблочный пирог",
+                "ingredients": [
+                    "Мука: 200 г",
+                    "Масло: 100 г",
+                    "Сахар: 150 г",
+                    "Яйца: 2 шт.",
+                    "Яблоки: 3 шт.",
+                    "Корица: 1 ч. ложка"
+                ],
+                "steps": [
+                    "Смешать муку, масло, сахар и яйца для теста.",
+                    "Нарезать яблоки, смешать с корицей.",
+                    "Выложить половину теста, сверху - яблоки, накрыть второй половиной.",
+                    "Выпекать при 180°C 40-45 минут."
+                ]
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('section');
+            const recipeCards = document.querySelectorAll('.recipe-card');
+            const modal = document.getElementById('recipeModal');
+            const closeModalBtn = document.querySelector('.close-btn');
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('animate');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            recipeCards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const recipeId = card.getAttribute('data-recipe-id');
+                    const recipe = recipes[recipeId];
+                    if (recipe) {
+                        document.getElementById('modalTitle').textContent = recipe.title;
+
+                        const ingredientsList = document.getElementById('modalIngredients');
+                        ingredientsList.innerHTML = '';
+                        recipe.ingredients.forEach(item => {
+                            const li = document.createElement('li');
+                            li.textContent = item;
+                            ingredientsList.appendChild(li);
+                        });
+
+                        const stepsList = document.getElementById('modalSteps');
+                        stepsList.innerHTML = '';
+                        recipe.steps.forEach((step, index) => {
+                            const li = document.createElement('li');
+                            li.textContent = `${index + 1}. ${step}`;
+                            stepsList.appendChild(li);
+                        });
+
+                        modal.style.display = 'block';
+                    }
+                });
+            });
+
+            closeModalBtn.addEventListener('click', () => {
+                modal.style.display = 'none';
+            });
+
+            window.addEventListener('click', (event) => {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>
